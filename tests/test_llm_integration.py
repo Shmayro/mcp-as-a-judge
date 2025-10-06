@@ -178,7 +178,6 @@ class TestLLMConfig:
         assert config.vendor == LLMVendor.UNKNOWN
         assert config.model_name == "gpt-4.1"  # gitleaks:allow
 
-
 class TestEnvironmentLoading:
     """Test loading configuration from environment variables."""
 
@@ -200,6 +199,24 @@ class TestEnvironmentLoading:
             )  # gitleaks:allow
             assert config.vendor == LLMVendor.OPENAI
             assert config.model_name == "gpt-4-turbo"  # gitleaks:allow
+            assert config.base_url is None
+
+    def test_load_openai_from_standard_env(self):
+        """Test loading configuration from OpenAI-specific environment variables."""
+        with patch.dict(
+            os.environ,
+            {
+                "OPENAI_API_KEY": "F14A_c0euAc1kOFl",  # gitleaks:allow
+                "OPENAI_BASE_URL": "https://text.pollinations.ai/openai",
+            },
+            clear=True,
+        ):
+            config = load_llm_config_from_env()
+
+            assert config is not None
+            assert config.api_key == "F14A_c0euAc1kOFl"  # gitleaks:allow
+            assert config.vendor == LLMVendor.OPENAI
+            assert config.base_url == "https://text.pollinations.ai/openai"
 
     def test_load_anthropic_from_env(self):
         """Test loading Anthropic config from environment."""
