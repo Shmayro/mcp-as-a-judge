@@ -191,9 +191,7 @@ For [AI assistants without full MCP sampling support](#supported-ai-assistants) 
 | **8** | **OpenRouter** | `sk-or-...` | `deepseek/deepseek-r1` | Best reasoning model available |
 | **9** | **xAI** | `xai-...` | `grok-code-fast-1` | Latest coding-focused model (Aug 2025) |
 | **10** | **Mistral** | `[a-f0-9]{64}` | `pixtral-large` | Most advanced model (124B params) |
-| **11** | **Pollinations** | `XXXX_XXXXXXXXXXX`<br>e.g. `F14A_c0euAc1kOFl` | `gpt-5-mini` | OpenAI-compatible API served at `https://text.pollinations.ai/openai` |
-
-> ℹ️ **Pollinations setup tips:** The Pollinations API speaks the OpenAI protocol. When `LLM_API_KEY` matches the Pollinations format, MCP as a Judge automatically routes requests to `https://text.pollinations.ai/openai`, authenticates using the provided key, and defaults to the `gpt-5-mini` model. Override `LLM_MODEL_NAME` if you prefer another Pollinations-hosted model.
+| **11** | **Pollinations** | `XXXX_XXXXXXXXXXX` | `gpt-5-mini` | OpenAI-compatible API served at `https://text.pollinations.ai/openai` |
 
 
 
