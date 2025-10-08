@@ -28,6 +28,9 @@ litellm.set_verbose = False
 logger = get_logger(__name__)
 
 
+POLLINATIONS_BASE_URL = "https://text.pollinations.ai/openai"
+
+
 class LLMClient:
     """LLM client using LiteLLM for multiple provider support."""
 
@@ -218,7 +221,7 @@ class LLMClient:
                 self.config.vendor == LLMVendor.POLLINATIONS
                 and "base_url" not in completion_params
             ):
-                completion_params["base_url"] = "https://text.pollinations.ai/openai"
+                completion_params["base_url"] = POLLINATIONS_BASE_URL
 
             # Use retry helper for rate limit handling
             response = await self._generate_text_with_retry(completion_params)
