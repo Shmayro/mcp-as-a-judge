@@ -1,14 +1,13 @@
-"""
-Tests for LLM integration functionality.
+"""Tests for LLM integration functionality.
 
-This module tests the LLM API key detection, vendor mapping,
-and fallback functionality when MCP sampling is not available.
+This module exercises API key detection, vendor defaults, and
+messaging-provider fallbacks when MCP sampling is not available.
 """
 
 import os
 from unittest.mock import MagicMock, patch
 
-from mcp_as_a_judge.llm.llm_client import LLMClient, LLMClientManager
+from mcp_as_a_judge.llm.llm_client import LLMClient, LLMClientManager, llm_manager
 from mcp_as_a_judge.llm.llm_integration import (
     LLMConfig,
     LLMVendor,
@@ -17,6 +16,7 @@ from mcp_as_a_judge.llm.llm_integration import (
     get_default_model,
     load_llm_config_from_env,
 )
+from mcp_as_a_judge.messaging.factory import MessagingProviderFactory
 
 
 class TestVendorDetection:
@@ -91,6 +91,12 @@ class TestVendorDetection:
         """Test None API key."""
         vendor = detect_vendor_from_api_key(None)
         assert vendor == LLMVendor.UNKNOWN
+
+    def test_detect_pollinations_allows_symbols(self):
+        """Pollinations keys accept any non-whitespace characters."""
+        api_key = "A!234567890bcdef"  # gitleaks:allow
+        vendor = detect_vendor_from_api_key(api_key)
+        assert vendor == LLMVendor.POLLINATIONS
 
 
 class TestDefaultModels:
@@ -217,11 +223,47 @@ class TestEnvironmentLoading:
             assert config.vendor == LLMVendor.ANTHROPIC
             assert config.model_name == "claude-sonnet-4-20250514"  # gitleaks:allow
 
+    def test_load_pollinations_from_alias_env(self):
+        """Pollinations alias environment variable should be detected."""
+        with patch.dict(
+            os.environ,
+            {"POLLINATIONS_API_KEY": "A!234567890bcdef"},
+            clear=True,
+        ):
+            config = load_llm_config_from_env()
+
+            assert config is not None
+            assert config.vendor == LLMVendor.POLLINATIONS
+            assert config.model_name == "gpt-5-mini"
+
     def test_load_no_env_vars(self):
         """Test loading when no environment variables are set."""
         with patch.dict(os.environ, {}, clear=True):
             config = load_llm_config_from_env()
             assert config is None
+
+
+class TestMessagingProviderAvailability:
+    """Ensure messaging providers detect Pollinations configuration."""
+
+    def test_llm_capability_available_with_pollinations_key(self):
+        """LLM API provider should be available when Pollinations key is set."""
+        original_client = llm_manager.get_client()
+        original_config = getattr(llm_manager, "_config", None)
+
+        try:
+            llm_manager._client = None
+            llm_manager._config = None
+
+            with patch.dict(
+                os.environ,
+                {"LLM_API_KEY": "A!234567890bcdef"},
+                clear=True,
+            ):
+                assert MessagingProviderFactory.check_llm_capability() is True
+        finally:
+            llm_manager._client = original_client
+            llm_manager._config = original_config
 
 
 class TestLLMClient:

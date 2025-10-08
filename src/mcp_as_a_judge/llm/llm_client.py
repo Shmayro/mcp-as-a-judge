@@ -28,6 +28,9 @@ litellm.set_verbose = False
 logger = get_logger(__name__)
 
 
+POLLINATIONS_BASE_URL = "https://text.pollinations.ai/openai"
+
+
 class LLMClient:
     """LLM client using LiteLLM for multiple provider support."""
 
@@ -88,6 +91,9 @@ class LLMClient:
         elif vendor == LLMVendor.VERTEX_AI:
             # Vertex AI uses service account JSON
             self._litellm.vertex_ai_key = api_key
+        elif vendor == LLMVendor.POLLINATIONS:
+            # Pollinations uses OpenAI-compatible authentication
+            self._litellm.openai_key = api_key
         else:
             # Fallback to generic API key
             self._litellm.api_key = api_key
@@ -123,6 +129,8 @@ class LLMClient:
             return f"bedrock/{model_name}"
         elif vendor == LLMVendor.VERTEX_AI and not model_name.startswith("vertex_ai/"):
             return f"vertex_ai/{model_name}"
+        elif vendor == LLMVendor.POLLINATIONS and not model_name.startswith("openai/"):
+            return f"openai/{model_name}"
 
         return model_name
 
@@ -208,6 +216,12 @@ class LLMClient:
             # Add JSON response format if requested
             if kwargs.get("response_format") == "json":
                 completion_params["response_format"] = {"type": "json_object"}
+
+            if (
+                self.config.vendor == LLMVendor.POLLINATIONS
+                and "base_url" not in completion_params
+            ):
+                completion_params["base_url"] = POLLINATIONS_BASE_URL
 
             # Use retry helper for rate limit handling
             response = await self._generate_text_with_retry(completion_params)
