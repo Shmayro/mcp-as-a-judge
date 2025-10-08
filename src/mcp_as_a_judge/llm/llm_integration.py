@@ -192,7 +192,7 @@ def load_llm_config_from_env() -> LLMConfig | None:
     vendor = _vendor_from_env(os.getenv("LLM_VENDOR"))
     base_url = os.getenv("LLM_BASE_URL") or os.getenv("OPENAI_BASE_URL")
 
-    if vendor is None and openai_api_key:
+    if openai_api_key and (vendor is None or vendor == LLMVendor.UNKNOWN):
         vendor = LLMVendor.OPENAI
 
     if any([api_key, vendor, base_url, model_name]):
