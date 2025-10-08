@@ -176,6 +176,7 @@ Notes:
 For [AI assistants without full MCP sampling support](#supported-ai-assistants) you can configure an LLM API key as a fallback. This ensures MCP as a Judge works even when the client doesn't support MCP sampling.
 
 - Set `LLM_API_KEY` (unified key). Vendor is auto-detected; optionally set `LLM_MODEL_NAME` to override the default.
+- Pollinations users can also set `POLLINATIONS_API_KEY` (same value) if they prefer a provider-specific environment variable.
 
 ### **Supported LLM Providers**
 
@@ -191,7 +192,7 @@ For [AI assistants without full MCP sampling support](#supported-ai-assistants) 
 | **8** | **OpenRouter** | `sk-or-...` | `deepseek/deepseek-r1` | Best reasoning model available |
 | **9** | **xAI** | `xai-...` | `grok-code-fast-1` | Latest coding-focused model (Aug 2025) |
 | **10** | **Mistral** | `[a-f0-9]{64}` | `pixtral-large` | Most advanced model (124B params) |
-| **11** | **Pollinations** | Fixed-length `16` characters (`A-Za-z0-9_-`) | `gpt-5-mini` | OpenAI-compatible base URL `https://text.pollinations.ai/openai` |
+| **11** | **Pollinations** | Fixed-length `16` characters (any non-whitespace) | `gpt-5-mini` | OpenAI-compatible base URL `https://text.pollinations.ai/openai` |
 
 
 

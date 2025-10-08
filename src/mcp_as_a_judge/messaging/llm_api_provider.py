@@ -34,10 +34,12 @@ class LLMAPIProvider(MessagingProvider):
 
     def _ensure_configured(self) -> None:
         """Ensure LLM manager is configured from environment."""
-        if not llm_manager.is_available():
-            config = load_llm_config_from_env()
-            if config:
-                llm_manager.configure(config)
+        if llm_manager.is_available():
+            return
+
+        config = load_llm_config_from_env()
+        if config and config.api_key:
+            llm_manager.configure(config)
 
     async def _send_message(
         self, messages: list[Message], config: MessagingConfig
@@ -55,6 +57,9 @@ class LLMAPIProvider(MessagingProvider):
             RuntimeError: If LLM client is not configured
             Exception: If LLM API call fails
         """
+        # Ensure configuration is up to date before sending
+        self._ensure_configured()
+
         # Get the LLM client
         client = llm_manager.get_client()
         if not client:
@@ -80,6 +85,7 @@ class LLMAPIProvider(MessagingProvider):
         Returns:
             True if LLM client is configured and available, False otherwise
         """
+        self._ensure_configured()
         return llm_manager.is_available()
 
     @property

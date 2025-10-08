@@ -67,7 +67,7 @@ API_KEY_PATTERNS = {
     LLMVendor.GROQ: re.compile(r"^gsk_[a-zA-Z0-9]{50,}"),
     LLMVendor.XAI: re.compile(r"^xai-[a-zA-Z0-9]{40,}"),
     LLMVendor.OPENROUTER: re.compile(r"^sk-or-[a-zA-Z0-9_-]{48}"),
-    LLMVendor.POLLINATIONS: re.compile(r"^[A-Za-z0-9_-]{16}$"),
+    LLMVendor.POLLINATIONS: re.compile(r"^[^\s]{16}$"),
     LLMVendor.OPENAI: re.compile(r"^sk-[a-zA-Z0-9]{20,}"),
     # Azure uses various patterns, often similar to OpenAI
     LLMVendor.AZURE: re.compile(r"^[a-f0-9]{32}$"),
@@ -168,9 +168,18 @@ def load_llm_config_from_env() -> LLMConfig | None:
     """
     # Check for the single LLM_API_KEY environment variable
     api_key = os.getenv("LLM_API_KEY")
+    if not api_key:
+        api_key = os.getenv("POLLINATIONS_API_KEY")
+
     if api_key:
+        api_key = api_key.strip()
+        if not api_key:
+            return None
+
         # Get model name from environment if specified
         model_name = os.getenv("LLM_MODEL_NAME")
+        if model_name is not None:
+            model_name = model_name.strip() or None
 
         return create_llm_config(api_key=api_key, model_name=model_name)
 
