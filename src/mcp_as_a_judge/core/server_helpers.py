@@ -44,7 +44,8 @@ def initialize_llm_configuration() -> None:
         )
     else:
         logger.info(
-            "No LLM API key found in environment. MCP sampling will be required."
+            "No LLM API key found in environment. MCP sampling will be required. "
+            "Set LLM_API_KEY or OPENAI_API_KEY (for Docker, pass them with -e)."
         )
 
 

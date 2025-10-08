@@ -56,6 +56,10 @@ class LLMConfig(BaseModel):
         default=DEFAULT_TEMPERATURE,
         description="Temperature for LLM responses (0.0-1.0) - Low for coding tasks",
     )
+    base_url: str | None = Field(
+        default=None,
+        description="Optional custom API base URL for providers that require it",
+    )
 
 
 # API key patterns for vendor detection (ordered by specificity)
@@ -128,6 +132,7 @@ def create_llm_config(
     api_key: str | None = None,
     model_name: str | None = None,
     vendor: LLMVendor | None = None,
+    base_url: str | None = None,
     **kwargs: str,
 ) -> LLMConfig:
     """Create LLM configuration with vendor detection and defaults.
@@ -151,7 +156,24 @@ def create_llm_config(
     if model_name is None:
         model_name = get_default_model(vendor)
 
-    return LLMConfig(api_key=api_key, model_name=model_name, vendor=vendor)
+    return LLMConfig(
+        api_key=api_key,
+        model_name=model_name,
+        vendor=vendor,
+        base_url=base_url,
+    )
+
+
+def _vendor_from_env(value: str | None) -> LLMVendor | None:
+    if not value:
+        return None
+
+    normalized = value.strip().lower()
+    for vendor in LLMVendor:
+        if vendor.value == normalized:
+            return vendor
+
+    return None
 
 
 def load_llm_config_from_env() -> LLMConfig | None:
@@ -164,11 +186,21 @@ def load_llm_config_from_env() -> LLMConfig | None:
         LLMConfig if LLM_API_KEY found in environment, None otherwise
     """
     # Check for the single LLM_API_KEY environment variable
-    api_key = os.getenv("LLM_API_KEY")
-    if api_key:
-        # Get model name from environment if specified
-        model_name = os.getenv("LLM_MODEL_NAME")
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("LLM_API_KEY") or openai_api_key
+    model_name = os.getenv("LLM_MODEL_NAME") or os.getenv("OPENAI_MODEL_NAME")
+    vendor = _vendor_from_env(os.getenv("LLM_VENDOR"))
+    base_url = os.getenv("LLM_BASE_URL") or os.getenv("OPENAI_BASE_URL")
 
-        return create_llm_config(api_key=api_key, model_name=model_name)
+    if openai_api_key and (vendor is None or vendor == LLMVendor.UNKNOWN):
+        vendor = LLMVendor.OPENAI
+
+    if any([api_key, vendor, base_url, model_name]):
+        return create_llm_config(
+            api_key=api_key,
+            model_name=model_name,
+            vendor=vendor,
+            base_url=base_url,
+        )
 
     return None
