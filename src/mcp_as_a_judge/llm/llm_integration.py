@@ -67,7 +67,7 @@ API_KEY_PATTERNS = {
     LLMVendor.GROQ: re.compile(r"^gsk_[a-zA-Z0-9]{50,}"),
     LLMVendor.XAI: re.compile(r"^xai-[a-zA-Z0-9]{40,}"),
     LLMVendor.OPENROUTER: re.compile(r"^sk-or-[a-zA-Z0-9_-]{48}"),
-    LLMVendor.POLLINATIONS: re.compile(r"^[A-Za-z0-9]{4}_[A-Za-z0-9]{11}$"),
+    LLMVendor.POLLINATIONS: re.compile(r"^[A-Za-z0-9_-]{16}$"),
     LLMVendor.OPENAI: re.compile(r"^sk-[a-zA-Z0-9]{20,}"),
     # Azure uses various patterns, often similar to OpenAI
     LLMVendor.AZURE: re.compile(r"^[a-f0-9]{32}$"),

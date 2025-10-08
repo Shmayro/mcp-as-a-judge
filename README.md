@@ -191,7 +191,7 @@ For [AI assistants without full MCP sampling support](#supported-ai-assistants) 
 | **8** | **OpenRouter** | `sk-or-...` | `deepseek/deepseek-r1` | Best reasoning model available |
 | **9** | **xAI** | `xai-...` | `grok-code-fast-1` | Latest coding-focused model (Aug 2025) |
 | **10** | **Mistral** | `[a-f0-9]{64}` | `pixtral-large` | Most advanced model (124B params) |
-| **11** | **Pollinations** | `XXXX_XXXXXXXXXXX` | `gpt-5-mini` | OpenAI-compatible API served at `https://text.pollinations.ai/openai` |
+| **11** | **Pollinations** | `16` characters (`A-Za-z0-9_-`) | `gpt-5-mini` | OpenAI-compatible API served at `https://text.pollinations.ai/openai` |
 
 
 
